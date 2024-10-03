@@ -213,59 +213,61 @@ d3.select('#loading').style('display', 'none');
 }
 
 // Function to update the color scale
+// Function to update the color scale
 function updateColorScale(metric, metric2 = null) {
-let values;
+  let values;
 
-if (metric2 === 'CustomPrice') {
-  const customPrice = parseFloat(d3.select('#customPriceInput').property('value'));
-  if (!isNaN(customPrice)) {
+  if (metric2 === 'CustomPrice') {
+    const customPrice = parseFloat(d3.select('#customPriceInput').property('value'));
+    if (!isNaN(customPrice)) {
+      values = Object.values(dataMap)
+        .map(d => d[metric])
+        .filter(v => isFinite(v));
+
+      const minValue = d3.min(values);
+      const maxValue = d3.max(values);
+
+      // Create a diverging scale centered at the custom price
+      colorScale = d3.scaleDiverging()
+        .domain([minValue, customPrice, maxValue])
+        .interpolator(t => d3.interpolateRdBu(1 - t)); // Reversed to align blue with lower values
+    } else {
+      // Handle invalid custom price
+      colorScale = d3.scaleSequential().interpolator(() => '#ccc').domain([0, 1]);
+    }
+  } else if (metric2) {
+    // Existing code for comparing two metrics
+    values = Object.values(dataMap)
+      .map(d => {
+        const value1 = d[metric];
+        const value2 = d[metric2];
+        return value2 !== 0 ? value1 / value2 : null;
+      })
+      .filter(v => v !== null && isFinite(v));
+    colorScale = colorScales['Comparison'];
+    if (values.length > 0) {
+      const minValue = d3.min(values);
+      const maxValue = d3.max(values);
+      colorScale.domain([minValue, maxValue]);
+    } else {
+      colorScale.domain([0, 1]);
+    }
+  } else {
+    // Existing code for a single metric
     values = Object.values(dataMap)
       .map(d => d[metric])
       .filter(v => isFinite(v));
-    
-    const minValue = d3.min(values);
-    const maxValue = d3.max(values);
-    
-    // Create a diverging scale centered at the custom price
-    colorScale = d3.scaleDiverging()
-      .domain([minValue, customPrice, maxValue])
-      .interpolator(t => d3.interpolateRdBu(1 - t)); // Reverse to have blue for lower values and red for higher values
-  } else {
-    // Handle invalid custom price
-    colorScale = d3.scaleSequential().interpolator(() => '#ccc').domain([0, 1]);
-  }
-} else if (metric2) {
-  // Existing code for comparing two metrics
-  values = Object.values(dataMap)
-    .map(d => {
-      const value1 = d[metric];
-      const value2 = d[metric2];
-      return value2 !== 0 ? value1 / value2 : null;
-    })
-    .filter(v => v !== null && isFinite(v));
-  colorScale = colorScales['Comparison'];
-  if (values.length > 0) {
-    const minValue = d3.min(values);
-    const maxValue = d3.max(values);
-    colorScale.domain([minValue, maxValue]);
-  } else {
-    colorScale.domain([0, 1]);
-  }
-} else {
-  // Existing code for a single metric
-  values = Object.values(dataMap)
-    .map(d => d[metric])
-    .filter(v => isFinite(v));
-  colorScale = colorScales[metric] || d3.scaleSequential(d3.interpolateBlues);
-  if (values.length > 0) {
-    const minValue = d3.min(values);
-    const maxValue = d3.max(values);
-    colorScale.domain([minValue, maxValue]);
-  } else {
-    colorScale.domain([0, 1]);
+    colorScale = colorScales[metric] || d3.scaleSequential(d3.interpolateBlues);
+    if (values.length > 0) {
+      const minValue = d3.min(values);
+      const maxValue = d3.max(values);
+      colorScale.domain([minValue, maxValue]);
+    } else {
+      colorScale.domain([0, 1]);
+    }
   }
 }
-}  
+
 
 // Function to get the color for a state
 function getColor(d, metric2 = null) {
@@ -353,135 +355,135 @@ tooltip.style('opacity', 0);
 }
 
 // Function to update the legend
-function updateLegend(metric2 = null) {
-// Clear existing legend
-legendGroup.selectAll('*').remove();
-svg.selectAll('defs').remove();
-
-// Legend dimensions
-const legendWidth = 300;
-const legendHeight = 10;
-
-// Create defs for gradient
-const defs = svg.append('defs');
-
-if (metric2 === 'CustomPrice') {
-  // For CustomPrice: Create a split gradient with blue and red
-  const linearGradient = defs.append('linearGradient')
-    .attr('id', 'linear-gradient');
-
-  const legendDomain = colorScale.domain(); // [min, customPrice, max]
-  const min = legendDomain[0];
-  const customPrice = legendDomain[1];
-  const max = legendDomain[2];
-
-  // Calculate the position of the custom price in the gradient
-  const splitPercent = ((customPrice - min) / (max - min)) * 100;
-
-  // Define gradient stops
-  linearGradient.selectAll('stop')
-    .data([
-      { offset: '0%', color: d3.interpolateBlues(0.3) },     // Light blue
-      { offset: `${splitPercent}%`, color: d3.interpolateBlues(0.9) }, // Dark blue
-      { offset: `${splitPercent}%`, color: d3.interpolateReds(0.3) },  // Light red
-      { offset: '100%', color: d3.interpolateReds(0.9) }   // Dark red
-    ])
-    .enter().append('stop')
-    .attr('offset', d => d.offset)
-    .attr('stop-color', d => d.color);
-
-  // Append the gradient rectangle to the legendGroup
-  legendGroup.append('rect')
-    .attr('width', legendWidth)
-    .attr('height', legendHeight)
-    .attr('x', (width - legendWidth) / 2)
-    .attr('y', height - 70)
-    .style('fill', 'url(#linear-gradient)');
-
-  // Legend axis scale
-  const legendAxisScale = d3.scaleLinear()
-    .domain([min, max])
-    .range([0, legendWidth]);
-
-  const legendAxis = d3.axisBottom(legendAxisScale)
-    .ticks(5)
-    .tickFormat(d3.format(".2f"));
-
-  // Append the legend axis to the legendGroup
-  legendGroup.append('g')
-    .attr('transform', `translate(${(width - legendWidth) / 2}, ${height - 60})`)
-    .call(legendAxis);
-
-  // Add a marker for the custom price
-  const xPosition = (width - legendWidth) / 2 + (customPrice - min) / (max - min) * legendWidth;
-
-  // Add a line to indicate the custom price
-  legendGroup.append('line')
-    .attr('x1', xPosition)
-    .attr('x2', xPosition)
-    .attr('y1', height - 70)
-    .attr('y2', height - 50)
-    .attr('stroke', 'black')
-    .attr('stroke-width', 2);
-
-  // Add a label for the custom price
-  legendGroup.append('text')
-    .attr('x', xPosition)
-    .attr('y', height - 75)
-    .attr('text-anchor', 'middle')
-    .attr('font-size', '12px')
-    .attr('fill', 'black')
-    .text(`Custom Price: ${customPrice}`);
-} else {
-  // For sequential scales (Single metric or Comparison without CustomPrice)
-  let interpolator;
-  if (metric2 && metric2 !== 'CustomPrice') {
-    interpolator = colorScales['Comparison'].interpolator();
-  } else if (colorScales[currentMetric]) {
-    interpolator = colorScales[currentMetric].interpolator();
-  } else {
-    interpolator = d3.interpolateBlues;
-  }
-
-  const linearGradient = defs.append('linearGradient')
-    .attr('id', 'linear-gradient');
-
-  // Generate gradient stops
-  const numStops = 50;
-  const legendData = d3.range(0, 1.01, 1 / numStops);
-
-  linearGradient.selectAll('stop')
-    .data(legendData)
-    .enter().append('stop')
-    .attr('offset', d => `${d * 100}%`)
-    .attr('stop-color', d => interpolator(d));
-
-  // Append the gradient rectangle to the legendGroup
-  legendGroup.append('rect')
-    .attr('width', legendWidth)
-    .attr('height', legendHeight)
-    .attr('x', (width - legendWidth) / 2)
-    .attr('y', height - 70)
-    .style('fill', 'url(#linear-gradient)');
-
-  // Determine the domain based on the colorScale
-  const legendDomain = colorScale.domain();
-
-  // Legend axis scale
-  const legendAxisScale = d3.scaleLinear()
-    .domain([legendDomain[0], legendDomain[1]])
-    .range([0, legendWidth]);
-
-  const legendAxis = d3.axisBottom(legendAxisScale)
-    .ticks(5)
-    .tickFormat(d3.format(".2f"));
-
-  // Append the legend axis to the legendGroup
-  legendGroup.append('g')
-    .attr('transform', `translate(${(width - legendWidth) / 2}, ${height - 60})`)
-    .call(legendAxis);
-}
-}
+  function updateLegend(metric2 = null) {
+    // Clear existing legend
+    legendGroup.selectAll('*').remove();
+    svg.selectAll('defs').remove();
+  
+    // Legend dimensions
+    const legendWidth = 300;
+    const legendHeight = 10;
+  
+    // Create defs for gradient
+    const defs = svg.append('defs');
+  
+    if (metric2 === 'CustomPrice') {
+      // For CustomPrice: Create a split gradient with dark-to-light blue and light-to-dark red
+      const linearGradient = defs.append('linearGradient')
+        .attr('id', 'linear-gradient');
+  
+      const legendDomain = colorScale.domain(); // [min, customPrice, max]
+      const min = legendDomain[0];
+      const customPrice = legendDomain[1];
+      const max = legendDomain[2];
+  
+      // Calculate the position of the custom price in the gradient
+      const splitPercent = ((customPrice - min) / (max - min)) * 100;
+  
+      // Define gradient stops with blue from dark to light and red from light to dark
+      linearGradient.selectAll('stop')
+        .data([
+          { offset: '0%', color: d3.interpolateBlues(0.9) },     // Dark blue
+          { offset: `${splitPercent}%`, color: d3.interpolateBlues(0.3) }, // Light blue
+          { offset: `${splitPercent}%`, color: d3.interpolateReds(0.3) },  // Light red
+          { offset: '100%', color: d3.interpolateReds(0.9) }   // Dark red
+        ])
+        .enter().append('stop')
+        .attr('offset', d => d.offset)
+        .attr('stop-color', d => d.color);
+  
+      // Append the gradient rectangle to the legendGroup
+      legendGroup.append('rect')
+        .attr('width', legendWidth)
+        .attr('height', legendHeight)
+        .attr('x', (width - legendWidth) / 2)
+        .attr('y', height - 70)
+        .style('fill', 'url(#linear-gradient)');
+  
+      // Legend axis scale
+      const legendAxisScale = d3.scaleLinear()
+        .domain([min, max])
+        .range([0, legendWidth]);
+  
+      const legendAxis = d3.axisBottom(legendAxisScale)
+        .ticks(5)
+        .tickFormat(d3.format(".2f"));
+  
+      // Append the legend axis to the legendGroup
+      legendGroup.append('g')
+        .attr('transform', `translate(${(width - legendWidth) / 2}, ${height - 60})`)
+        .call(legendAxis);
+  
+      // Add a marker for the custom price
+      const xPosition = (width - legendWidth) / 2 + (customPrice - min) / (max - min) * legendWidth;
+  
+      // Add a line to indicate the custom price
+      legendGroup.append('line')
+        .attr('x1', xPosition)
+        .attr('x2', xPosition)
+        .attr('y1', height - 70)
+        .attr('y2', height - 50)
+        .attr('stroke', 'black')
+        .attr('stroke-width', 2);
+  
+      // Add a label for the custom price
+      legendGroup.append('text')
+        .attr('x', xPosition)
+        .attr('y', height - 75)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '12px')
+        .attr('fill', 'black')
+        .text(`Custom Price: ${customPrice}`);
+    } else {
+      // For sequential scales (Single metric or Comparison without CustomPrice)
+      let interpolator;
+      if (metric2 && metric2 !== 'CustomPrice') {
+        interpolator = colorScales['Comparison'].interpolator();
+      } else if (colorScales[currentMetric]) {
+        interpolator = colorScales[currentMetric].interpolator();
+      } else {
+        interpolator = d3.interpolateBlues;
+      }
+  
+      const linearGradient = defs.append('linearGradient')
+        .attr('id', 'linear-gradient');
+  
+      // Generate gradient stops
+      const numStops = 50;
+      const legendData = d3.range(0, 1.01, 1 / numStops);
+  
+      linearGradient.selectAll('stop')
+        .data(legendData)
+        .enter().append('stop')
+        .attr('offset', d => `${d * 100}%`)
+        .attr('stop-color', d => interpolator(d));
+  
+      // Append the gradient rectangle to the legendGroup
+      legendGroup.append('rect')
+        .attr('width', legendWidth)
+        .attr('height', legendHeight)
+        .attr('x', (width - legendWidth) / 2)
+        .attr('y', height - 70)
+        .style('fill', 'url(#linear-gradient)');
+  
+      // Determine the domain based on the colorScale
+      const legendDomain = colorScale.domain();
+  
+      // Legend axis scale
+      const legendAxisScale = d3.scaleLinear()
+        .domain([legendDomain[0], legendDomain[1]])
+        .range([0, legendWidth]);
+  
+      const legendAxis = d3.axisBottom(legendAxisScale)
+        .ticks(5)
+        .tickFormat(d3.format(".2f"));
+  
+      // Append the legend axis to the legendGroup
+      legendGroup.append('g')
+        .attr('transform', `translate(${(width - legendWidth) / 2}, ${height - 60})`)
+        .call(legendAxis);
+    }
+  }  
 
 // Function to update the metric descriptions
 function updateMetricDescriptions(metric1, metric2 = null) {
