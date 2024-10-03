@@ -121,7 +121,7 @@ states = mapGroup.selectAll('path')
   .on('mouseout', handleMouseOut);
 }
 
-// Function to set up event listeners
+// Function to set up event listeners 
 function setupEventListeners() {
 d3.select('#metricSelect').on('change', function() {
   currentMetric = this.value;
