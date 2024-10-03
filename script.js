@@ -489,7 +489,7 @@ let description;
 
 if (metric2) {
   if (metric2 === 'CustomPrice') {
-    description = 'Custom Price comparison. Blue = cheaper than your local pint, red = evil prevails (more expensive)';
+    description = 'Try putting in the price of your local pint. <br>Blue = cheaper than your local pint, red = evil prevails (more expensive)';
   } else {
     description = 'Ratio between selected metrics.';
   }
