@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>US Guinness Index</title>
+    <!-- Use D3 v6 for compatibility -->
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <!-- Include d3-scale-chromatic for color interpolators -->
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>US Guinness Price Map</h1>
+    <div id="loading" style="display: none;">Loading...</div>
+    <div id="controls">
+        <label for="metricSelect">Select Metric:</label>
+        <select id="metricSelect">
+            <option value="GuinnessPrice">Guinness Price</option>
+            <option value="RPP">RPP</option>
+            <option value="DPI">DPI</option>
+            <option value="BigMacPrice">Big Mac Price</option>
+            <option value="IrishAncestryNum">Irish Ancestry Total</option>
+            <option value="IrishAncestryPer">Irish Ancestry Percentage</option>
+            <option value="GuinnessAffordability">Guinness Affordability</option>
+            <option value="BigMacAffordability">Big Mac Affordability</option>
+        </select>
+        
+        <label>
+            <input type="checkbox" id="compareCheckbox">
+        </label>
+        
+        <label for="metricSelect2">Select box to compare a second metric:</label>
+        <select id="metricSelect2" disabled>
+            <option value="GuinnessPrice">Guinness Price</option>
+            <option value="RPP">RPP</option>
+            <option value="DPI">DPI</option>
+            <option value="BigMacPrice">Big Mac Price</option>
+            <option value="IrishAncestryNum">Irish Ancestry Total</option>
+            <option value="IrishAncestryPer">Irish Ancestry Percentage</option>
+            <option value="GuinnessAffordability">Guinness Affordability</option>
+            <option value="BigMacAffordability">Big Mac Affordability</option>
+            <option value="CustomPrice">Custom Price</option>
+        </select>
+        <input type="number" id="customPriceInput" placeholder="Enter custom price" style="display: none;" step="0.01;">
+        <span id="customPriceError" style="color: red; display: none;">Please enter a valid price greater than zero.</span>      
+        <button id="resetButton">Reset</button>
+    </div>
+    <div id="metricDescriptions">
+        <!-- Descriptions will be injected here -->
+    </div>
+    <div id="map"></div>
+    <div id="tables"></div>
+    <script src="script.js"></script>
+    <p>This is a tiny project by <a href="https://x.com/JamesNBryant"> @JamesNicholasBryant</a></p>
+    <p>Sources, data, commentary can be found <a href="https://docs.google.com/spreadsheets/d/13UHFnUDtmKop-gcair_FXKbpqnKcTvNrQN-iKljSeFo/edit?usp=sharing">here</a></p>
+
+</body>
+</html>
