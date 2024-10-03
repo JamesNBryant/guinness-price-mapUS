@@ -94,7 +94,7 @@ select {
 select option {
   white-space: nowrap;
 }
-
+ 
 /* Adjust z-index if necessary */
 select {
   position: relative;

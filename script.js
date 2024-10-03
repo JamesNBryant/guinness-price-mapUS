@@ -28,7 +28,7 @@ const svg = d3.select('#map')
 .attr('viewBox', `0 0 ${width} ${height}`)
 .attr('preserveAspectRatio', 'xMinYMin meet')
 .classed('svg-content-responsive', true);
-
+ 
 // Projection and path generator
 const projection = d3.geoAlbersUsa()
 .scale(1000)
