@@ -11,48 +11,69 @@
 </head>
 <body> 
     <h1>US Guinness Price Map</h1>
+
     <div id="loading" style="display: none;">Loading...</div>
+
     <div id="controls">
-        <label for="metricSelect">Select Metric:</label>
-        <select id="metricSelect">
-            <option value="GuinnessPrice">Guinness Price</option>
-            <option value="RPP">RPP</option>
-            <option value="DPI">DPI</option>
-            <option value="BigMacPrice">Big Mac Price</option>
-            <option value="IrishAncestryNum">Irish Ancestry Total</option>
-            <option value="IrishAncestryPer">Irish Ancestry Percentage</option>
-            <option value="GuinnessAffordability">Guinness Affordability</option>
-            <option value="BigMacAffordability">Big Mac Affordability</option>
-        </select>
+        <!-- Div 1: First Metric Select Box -->
+        <div class="control-group">
+            <label for="metricSelect">Select Metric:</label>
+            <select id="metricSelect">
+                <option value="GuinnessPrice">Guinness Price</option>
+                <option value="RPP">RPP</option>
+                <option value="DPI">DPI</option>
+                <option value="BigMacPrice">Big Mac Price</option>
+                <option value="IrishAncestryNum">Irish Ancestry Total</option>
+                <option value="IrishAncestryPer">Irish Ancestry Percentage</option>
+                <option value="GuinnessAffordability">Guinness Affordability</option>
+                <option value="BigMacAffordability">Big Mac Affordability</option>
+            </select>
+        </div>
         
-        <label>
-            <input type="checkbox" id="compareCheckbox">
-        </label>
-        
-        <label for="metricSelect2">Select box to compare a second metric:</label>
-        <select id="metricSelect2" disabled>
-            <option value="GuinnessPrice">Guinness Price</option>
-            <option value="RPP">RPP</option>
-            <option value="DPI">DPI</option>
-            <option value="BigMacPrice">Big Mac Price</option>
-            <option value="IrishAncestryNum">Irish Ancestry Total</option>
-            <option value="IrishAncestryPer">Irish Ancestry Percentage</option>
-            <option value="GuinnessAffordability">Guinness Affordability</option>
-            <option value="BigMacAffordability">Big Mac Affordability</option>
-            <option value="CustomPrice">Custom Value</option>
-        </select>
-        <input type="number" id="customPriceInput" placeholder="Enter custom price" style="display: none;" step="0.01;">
-        <span id="customPriceError" style="color: red; display: none;">Please enter a valid price greater than zero.</span>      
-        <button id="resetButton">Reset</button>
-    </div> 
+        <!-- Div 2: Checkbox and Second Metric Select Box -->
+        <div class="control-group">
+            <label for="compareCheckbox">
+                <input type="checkbox" id="compareCheckbox"> Compare with another metric
+            </label>
+            
+            <select id="metricSelect2" disabled>
+                <option value="GuinnessPrice">Guinness Price</option>
+                <option value="RPP">RPP</option>
+                <option value="DPI">DPI</option>
+                <option value="BigMacPrice">Big Mac Price</option>
+                <option value="IrishAncestryNum">Irish Ancestry Total</option>
+                <option value="IrishAncestryPer">Irish Ancestry Percentage</option>
+                <option value="GuinnessAffordability">Guinness Affordability</option>
+                <option value="BigMacAffordability">Big Mac Affordability</option>
+                <option value="CustomPrice">Custom Value</option>
+            </select>
+    
+            <input type="number" id="customPriceInput" placeholder="Enter custom price" style="display: none;" step="0.01">
+            <span id="customPriceError" style="color: red; display: none;">Please enter a valid price greater than zero.</span>      
+        </div>
+    
+        <!-- Div 3: Buttons -->
+        <div class="control-group">
+            <button id="suggestionButton">Show Suggestions</button>
+            <button id="resetButton">Reset</button>
+        </div>
+    </div>     
+
     <div id="metricDescriptions">
         <!-- Descriptions will be injected here -->
     </div>
-    <div id="map"></div>
-    <div id="tables"></div>
-    <script src="script.js"></script>
-    <p>This is a tiny project by <a href="https://x.com/JamesNBryant"> @JamesNicholasBryant</a></p>
-    <p>Sources, data, commentary can be found <a href="https://docs.google.com/spreadsheets/d/13UHFnUDtmKop-gcair_FXKbpqnKcTvNrQN-iKljSeFo/edit?usp=sharing">here</a></p>
 
+    <!-- Map container with position relative for positioning elements -->
+    <div id="map" style="position: relative;"></div>
+
+    <div id="legend"></div> <!-- Legend will be placed here -->
+
+    <div id="tables"></div>
+
+    <!-- Include the script after all elements are declared -->
+    <script src="script.js"></script>
+
+    <p>This is a tiny project by <a href="https://x.com/JamesNBryant">@JamesNicholasBryant</a></p>
+    <p>Sources, data, and commentary can be found <a href="https://www.notion.so/Guinness-Index-1074ec23504980fe9c34ddb774efbf55?pvs=4">here</a>.</p>
 </body>
 </html>
